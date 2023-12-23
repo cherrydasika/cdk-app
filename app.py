@@ -7,7 +7,8 @@ from cdk_app.cdk_app_stack import CdkAppStack
 
 
 app = cdk.App()
-CdkAppStack(app, "CdkAppStack",
+env_UK = cdk.Environment(account="875257978630", region="eu-west-2")
+CdkAppStack(app, "CdkAppStack", env=env_UK
     # If you don't specify 'env', this stack will be environment-agnostic.
     # Account/Region-dependent features and context lookups will not work,
     # but a single synthesized template can be deployed anywhere.
