@@ -17,7 +17,8 @@ class CdkAppStack(Stack):
     def __init__(self, scope: Construct, construct_id: str, **kwargs) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
-        glue_job_1_name="glue_script_test.py"  
+        glue_job_1_name="glue_script_test.py" 
+        glue_job_2_name="glue_transformation_test.py" 
 
         # Create an s3 buckets
         glue_bucket = s3.Bucket(
@@ -50,7 +51,7 @@ class CdkAppStack(Stack):
         # Upload glue script to s3 bucket (csv file)
         csv_uploads = s3Deploy.BucketDeployment(self, 
                                                  "output_csv_files", 
-                                                 sources=[s3Deploy.Source.asset('C:\D\github\cdk-app\output_files')],
+                                                 sources=[s3Deploy.Source.asset('C:\D\github\cdk-app\ouput_files')],
                                                  destination_bucket=csv_bucket
                                                 )
 
@@ -97,7 +98,8 @@ class CdkAppStack(Stack):
         )       
 
         # Define the glue job
-        glue_.CfnJob(self, 'my-glue-job', 
+        glue_.CfnJob(self, 
+            id= 'my-glue-job', 
             name='glue-job-for-testing',
             role = glue_role.role_arn,
             command = glue_.CfnJob.JobCommandProperty(
@@ -108,6 +110,30 @@ class CdkAppStack(Stack):
             glue_version='3.0',
             timeout=2          
         )
+
+        # Define the glue transformation job with input and output parameters
+        glue_.CfnJob(self, 
+            id= 'my-glue-transform-job', 
+            name='glue-job-transform-testing',
+            role = glue_role.role_arn,
+            command = glue_.CfnJob.JobCommandProperty(
+                name='glueetl',
+                python_version='3',
+                script_location=f's3://{glue_bucket.bucket_name}/{glue_job_2_name}'
+            ),
+            glue_version='3.0',
+            timeout=2,
+            default_arguments={
+                '--input_loc': f's3://{csv_bucket.bucket_name}',
+                '--output_loc': f's3://{csv_bucket.bucket_name}/parquet/'
+            }          
+        )
+
+        # Create a glue workflow
+
+        # Create a step function
+
+        
 
         # The code that defines your stack goes here
 
