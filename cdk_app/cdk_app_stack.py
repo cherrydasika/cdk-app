@@ -85,9 +85,10 @@ class CdkAppStack(Stack):
         ) 
 
         # Define the crawler
-        crawler = glue_.CfnCrawler(
+        self.glue_crawler = glue_.CfnCrawler(
             self,
             'csv-crawler',
+            name='csv-crawler',
             role=glue_role.role_arn,
             database_name='csv_db',
             targets={
@@ -98,7 +99,7 @@ class CdkAppStack(Stack):
         )       
 
         # Define the glue job
-        glue_.CfnJob(self, 
+        glue_job_test = glue_.CfnJob(self, 
             id= 'my-glue-job', 
             name='glue-job-for-testing',
             role = glue_role.role_arn,
@@ -112,7 +113,7 @@ class CdkAppStack(Stack):
         )
 
         # Define the glue transformation job with input and output parameters
-        glue_.CfnJob(self, 
+        self.glue_tranform_job = glue_.CfnJob(self, 
             id= 'my-glue-transform-job', 
             name='glue-job-transform-testing',
             role = glue_role.role_arn,
@@ -130,10 +131,60 @@ class CdkAppStack(Stack):
         )
 
         # Create a glue workflow
+        self.glue_workflow = glue_.CfnWorkflow(self, "MyCfnWorkflow",
+            default_run_properties={
+                "--param1":"test",
+                "--param2":"script",
+            },
+            description="this is a glue workflow",
+            max_concurrent_runs=2,
+            name="workflow_format_changes"
+        )
+
+        # # Create a workflow trigger
+        # glue_.CfnTrigger(self, 
+        #                  id='glue_crawler_trigger',
+        #                  name='glue_crawler_trigger',
+        #                  actions=[
+        #                      glue_.CfnTrigger.ActionProperty(
+        #                         crawler_name= glue_crawler.name,
+        #                         notification_property=glue_.CfnTrigger.NotificationPropertyProperty(notify_delay_after=3),
+        #                         timeout=3
+        #                      )
+        #                  ],
+        #                  type='EVENT',
+        #                  workflow_name=glue_workflow.name
+        #                  )
+        # # Create a workflow trigger with dependency
+        # glue_.CfnTrigger(
+        #                     self,
+        #                     id='glue_job_trigger',
+        #                     name='glue_job_trigger',
+        #                     actions=[
+        #                         glue_.CfnTrigger.ActionProperty(
+        #                             job_name=glue_tranform_job.name,
+        #                             notification_property=glue_.CfnTrigger.NotificationPropertyProperty(notify_delay_after=3),
+        #                             timeout=3
+        #                         )
+        #                     ],
+        #                     type='CONDITIONAL',
+        #                     start_on_creation=True,
+        #                     workflow_name=glue_workflow.name,
+        #                     predicate=glue_.CfnTrigger.PredicateProperty(
+        #                         conditions=[
+        #                             glue_.CfnTrigger.ConditionProperty(
+        #                                 crawler_name= glue_crawler.name,
+        #                                 logical_operator='EQUALS',
+        #                                 crawl_state='SUCCEEDED'
+        #                             )
+        #                         ]
+        #                     )                        
+        #                 )
+        
 
         # Create a step function
 
-        
+
 
         # The code that defines your stack goes here
 
